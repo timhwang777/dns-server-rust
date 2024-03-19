@@ -1,4 +1,3 @@
-#[repr(packed)]
 pub struct DNSHeader {
     pub id: u16,
     pub qr: u8,

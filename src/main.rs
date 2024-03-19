@@ -29,7 +29,7 @@ fn main() {
                         arcount: 0,
                     },
                     question: dns_question::DNSQuestion {
-                        qname: vec!["codecrafters".to_string(), "io".to_string()],
+                        qname: "codecrafters.io".to_string(),
                         qtype: 1,
                         qclass: 1,
                     },

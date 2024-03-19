@@ -1,7 +1,7 @@
 use crate::dns_header::DNSHeader;
 use crate::dns_question::DNSQuestion;
 
-#[repr(packed)]
+
 pub struct DNSMessage {
     pub header: DNSHeader,
     pub question: DNSQuestion,

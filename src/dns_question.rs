@@ -1,6 +1,5 @@
-#[repr(packed)]
 pub struct DNSQuestion {
-    pub qname: Vec<String>,
+    pub qname: String,
     pub qtype: u16,
     pub qclass: u16,
 }
@@ -9,9 +8,9 @@ impl DNSQuestion {
     pub fn encode_question(&self) -> Vec<u8> {
         let mut buf = Vec::new();
 
-        for label in &self.qname {
+        for label in self.qname.split(".") {
             buf.push(label.len() as u8);
-            buf.extend(label.as_bytes());
+            buf.extend_from_slice(label.as_bytes());
         }
         buf.push(0);
 
