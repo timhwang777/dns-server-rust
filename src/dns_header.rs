@@ -34,4 +34,36 @@ impl DNSHeader {
 
         buf
     }
+
+    pub fn decode_header(buf: &[u8]) -> Self {
+        let id = u16::from_be_bytes([buf[0], buf[1]]);
+        let qr = buf[2] >> 7;
+        let opcode = (buf[2] >> 3) & 0x0F;
+        let aa = ((buf[2] >> 2) & 0x01) != 0;
+        let tc = ((buf[2] >> 1) & 0x01) != 0;
+        let rd = (buf[2] & 0x01) != 0;
+        let ra = (buf[3] >> 7) != 0;
+        let z = (buf[3] >> 4) & 0x07;
+        let rcode = buf[3] & 0x0F;
+        let qdcount = u16::from_be_bytes([buf[4], buf[5]]);
+        let ancount = u16::from_be_bytes([buf[6], buf[7]]);
+        let nscount = u16::from_be_bytes([buf[8], buf[9]]);
+        let arcount = u16::from_be_bytes([buf[10], buf[11]]);
+
+        Self {
+            id,
+            qr,
+            opcode,
+            aa,
+            tc,
+            rd,
+            ra,
+            z,
+            rcode,
+            qdcount,
+            ancount,
+            nscount,
+            arcount,
+        }
+    }
 }

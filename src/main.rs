@@ -13,22 +13,17 @@ fn main() {
         match udp_socket.recv_from(&mut buf) {
             Ok((size, source)) => {
                 println!("Received {} bytes from {}", size, source);
+
+                let buf = &buf[..size];
+                let mut header = dns_header::DNSHeader::decode_header(buf);
+                header.qr = 1;
+                header.ancount = 1;
+                if header.opcode != 0 {
+                    header.rcode = 4;
+                }
+
                 let expected = dns_message::DNSMessage {
-                    header: dns_header::DNSHeader {
-                        id: 1234,
-                        qr: 1,
-                        opcode: 0,
-                        aa: false,
-                        tc: false,
-                        rd: true,
-                        ra: false,
-                        z: 0,
-                        rcode: 0,
-                        qdcount: 1,
-                        ancount: 1,
-                        nscount: 0,
-                        arcount: 0,
-                    },
+                    header: header,
                     question: dns_question::DNSQuestion {
                         qname: "codecrafters.io".to_string(),
                         qtype: 1,
