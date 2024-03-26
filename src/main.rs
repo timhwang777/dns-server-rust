@@ -3,6 +3,7 @@ use std::net::UdpSocket;
 mod dns_message;
 mod dns_header;
 mod dns_question;
+mod dns_answer;
 
 fn main() {
     let udp_socket = UdpSocket::bind("127.0.0.1:2053").expect("Failed to bind to address");
@@ -24,7 +25,7 @@ fn main() {
                         z: 0,
                         rcode: 0,
                         qdcount: 1,
-                        ancount: 0,
+                        ancount: 1,
                         nscount: 0,
                         arcount: 0,
                     },
@@ -32,6 +33,14 @@ fn main() {
                         qname: "codecrafters.io".to_string(),
                         qtype: 1,
                         qclass: 1,
+                    },
+                    answer: dns_answer::DNSAnswer {
+                        name: "codecrafters.io".to_string(),
+                        atype: 1,
+                        aclass: 1,
+                        ttl: 60,
+                        rdlength: 4,
+                        rdata: vec![8, 8, 8, 8],
                     },
                 };
                 let response = expected.encode();

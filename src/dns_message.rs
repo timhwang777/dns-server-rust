@@ -1,10 +1,12 @@
 use crate::dns_header::DNSHeader;
 use crate::dns_question::DNSQuestion;
+use crate::dns_answer::DNSAnswer;
 
 
 pub struct DNSMessage {
     pub header: DNSHeader,
     pub question: DNSQuestion,
+    pub answer: DNSAnswer,
 }
 
 impl DNSMessage {
@@ -22,6 +24,9 @@ impl DNSMessage {
 
         let question_bytes = self.encode_question_to_message();
         response.extend_from_slice(&question_bytes);
+
+        let answer_bytes = self.answer.encode_answer();
+        response.extend_from_slice(&answer_bytes);
 
         response
     }
