@@ -49,6 +49,7 @@ impl DNSQuestion {
                 qname.push_str(std::str::from_utf8(&buf[offset + 1..offset + 1 + len as usize]).unwrap());
                 offset += len as usize + 1;
             }
+            println!("qname: {}", qname);
         }
     
         if !jumped {
