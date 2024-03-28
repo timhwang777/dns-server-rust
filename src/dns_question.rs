@@ -20,32 +20,49 @@ impl DNSQuestion {
         buf
     }
 
-    pub fn decode_question(buf: &[u8]) -> Self {
+    pub fn decode_question(buf: &[u8], start: usize) -> (Self, usize) {
         let mut qname = String::new();
-        let mut offset = 0;
-
+        let mut offset = start;
+        let mut jumped = false;
+        let mut jump_offset = 0;
+    
         loop {
-            let len = buf[offset] as usize;
+            let len = buf[offset];
             if len == 0 {
                 break;
             }
-
-            if offset > 0 {
-                qname.push('.');
+    
+            if (len & 0xC0) == 0xC0 {
+                // This is a pointer to a previous name
+                if !jumped {
+                    jump_offset = offset + 2;
+                }
+                let byte1 = (len as u16) & 0x3F; // Last 6 bits of first byte
+                let byte2 = buf[offset + 1] as u16; // Entire second byte
+                offset = ((byte1 << 8) | byte2) as usize; // Calculate offset from start of message
+                jumped = true;
+            } else {
+                if offset > 0 {
+                    qname.push('.');
+                }
+    
+                qname.push_str(std::str::from_utf8(&buf[offset + 1..offset + 1 + len as usize]).unwrap());
+                offset += len as usize + 1;
             }
-
-            qname.push_str(std::str::from_utf8(&buf[offset + 1..offset + 1 + len]).unwrap());
-            offset += len + 1;
         }
-
-        let qtype = u16::from_be_bytes([buf[offset + 1], buf[offset + 2]]);
-        let qclass = u16::from_be_bytes([buf[offset + 3], buf[offset + 4]]);
-
-        Self {
+    
+        if !jumped {
+            jump_offset = offset + 1;
+        }
+    
+        let qtype = u16::from_be_bytes([buf[jump_offset], buf[jump_offset + 1]]);
+        let qclass = u16::from_be_bytes([buf[jump_offset + 2], buf[jump_offset + 3]]);
+    
+        (Self {
             qname,
             qtype,
             qclass,
-        }
+        }, jump_offset + 4)
     }
 }
 
