@@ -15,28 +15,28 @@ fn main() {
                 println!("Received {} bytes from {}", size, source);
 
                 let buf = &buf[..size];
-                let mut header = dns_header::DNSHeader::decode_header(buf);
+                let mut header = dns_header::DNSHeader::decode_header(&buf[0..12]);
                 header.qr = 1;
                 header.ancount = 1;
                 if header.opcode != 0 {
                     header.rcode = 4;
                 }
 
+                let question = dns_question::DNSQuestion::decode_question(&buf[12..size]);
+
+                let answer = dns_answer::DNSAnswer {
+                    name: question.qname.clone(),
+                    atype: 1,
+                    aclass: 1,
+                    ttl: 60,
+                    rdlength: 4,
+                    rdata: vec![8, 8, 8, 8],
+                };
+
                 let expected = dns_message::DNSMessage {
                     header: header,
-                    question: dns_question::DNSQuestion {
-                        qname: "codecrafters.io".to_string(),
-                        qtype: 1,
-                        qclass: 1,
-                    },
-                    answer: dns_answer::DNSAnswer {
-                        name: "codecrafters.io".to_string(),
-                        atype: 1,
-                        aclass: 1,
-                        ttl: 60,
-                        rdlength: 4,
-                        rdata: vec![8, 8, 8, 8],
-                    },
+                    question: question,
+                    answer: answer
                 };
                 let response = expected.encode();
                 
