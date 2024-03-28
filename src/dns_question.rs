@@ -21,6 +21,7 @@ impl DNSQuestion {
     }
 
     pub fn decode_question(buf: &[u8], start: usize) -> (Self, usize) {
+        println!("Decoding question");
         let mut qname = String::new();
         let mut offset = start;
         let mut jumped = false;
