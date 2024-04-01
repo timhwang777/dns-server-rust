@@ -62,6 +62,9 @@ fn decode_name(buf: &[u8]) -> String {
                 name.push('.');
             }
 
+            if offset + 1 + len as usize > buf.len() {
+                break;
+            }
             name.push_str(std::str::from_utf8(&buf[offset + 1..offset + 1 + len as usize]).unwrap());
             offset += len as usize + 1;
         }
