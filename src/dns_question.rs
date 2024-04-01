@@ -29,8 +29,17 @@ impl DNSQuestion {
 
         let offset = qname.len() + 12;
 
-        let qtype = u16::from_be_bytes([buf[offset], buf[offset + 1]]);
-        let qclass = u16::from_be_bytes([buf[offset + 2], buf[offset + 3]]);
+        let qtype = if buf.len() >= offset + 2 {
+            u16::from_be_bytes([buf[offset], buf[offset + 1]])
+        } else {
+            1
+        };
+    
+        let qclass = if buf.len() >= offset + 4 {
+            u16::from_be_bytes([buf[offset + 2], buf[offset + 3]])
+        } else {
+            1
+        };
 
         Self {
             qname,
