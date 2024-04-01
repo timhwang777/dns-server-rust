@@ -1,3 +1,5 @@
+use bytes::Buf;
+
 pub struct DNSQuestion {
     pub qname: String,
     pub qtype: u16,
@@ -39,35 +41,32 @@ impl DNSQuestion {
 }
 
 fn decode_name(buf: &[u8]) -> String {
-    let mut offset = 0;
+    let mut bytes = bytes::Bytes::copy_from_slice(buf);
+    let orig = bytes.clone();
+
     let mut label = String::new();
 
     loop {
-        let len = buf[offset];
+        let len = bytes.get_u8();
 
         if len == 0 {
             break;
         } else if len >> 6 == 0b11 {
             // compressed name; byte one is len
-            let byte_two = buf[offset + 1];
-            offset = ((((len & 0b0011_1111) as u16) << 8) | byte_two as u16) as usize;
+            let byte_two = bytes.get_u8();
+            let offset: usize = ((((len & 0b0011_1111) as u16) << 8) | byte_two as u16) as usize;
 
-            let name = decode_name(&buf[offset..]);
+            let name = decode_name(&orig.slice(offset..));
 
-            label.push_str(&name);
+            label.push_str(name.as_str());
             label.push('.');
         } else {
-            let content = &buf[offset + 1..offset + 1 + len as usize];
-            label.push_str(std::str::from_utf8(content).unwrap());
+            let content = bytes.copy_to_bytes(len as usize);
+            label.push_str(std::str::from_utf8(&content[..]).unwrap());
             label.push('.');
-
-            offset += len as usize + 1;
         }
     }
 
-    if !label.is_empty() {
-        label.pop();
-    }
+    label.pop();
     label
 }
-
