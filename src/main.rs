@@ -24,7 +24,7 @@ fn main() {
                 let mut offset = 12 as usize;
                 let mut questions = Vec::new();
                 for _ in 0..header.qdcount {
-                    let (question, end_of_question) = dns_question::DNSQuestion::decode_question(&buf[offset..size], offset);
+                    let (question, end_of_question) = dns_question::DNSQuestion::decode_question(&buf[12..], offset);
                     questions.push(question);
                     offset = end_of_question;
                 }
