@@ -37,6 +37,7 @@ impl DNSQuestion {
 }
 
 fn decode_name(buf: &[u8], mut offset: usize) -> (String, usize) {
+    println!("Decoding name");
     let mut qname = String::new();
     let mut jumped = false;
     let mut jump_offset = 0;
