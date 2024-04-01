@@ -40,37 +40,34 @@ impl DNSQuestion {
 
 fn decode_name(buf: &[u8]) -> String {
     let mut offset = 0;
-    let mut name = String::new();
+    let mut label = String::new();
 
-    while offset < buf.len() {
+    loop {
         let len = buf[offset];
+
         if len == 0 {
-            offset += 1;
-            if offset < buf.len() {
-                name.push('.');
-            }
-            continue;
-        }
+            break;
+        } else if len >> 6 == 0b11 {
+            // compressed name; byte one is len
+            let byte_two = buf[offset + 1];
+            offset = ((((len & 0b0011_1111) as u16) << 8) | byte_two as u16) as usize;
 
-        if (len & 0xC0) == 0xC0 {
-            let byte1 = (len as u16) & 0x3F; // Last 6 bits of first byte
-            let byte2 = buf[offset + 1] as u16; // Entire second byte
-            offset = ((byte1 << 8) | byte2) as usize; // Calculate offset from start of message
-            name.push_str(&decode_name(&buf[offset..]));
+            let name = decode_name(&buf[offset..]);
+
+            label.push_str(&name);
+            label.push('.');
         } else {
-            if !name.is_empty() {
-                name.push('.');
-            }
+            let content = &buf[offset + 1..offset + 1 + len as usize];
+            label.push_str(std::str::from_utf8(content).unwrap());
+            label.push('.');
 
-            if offset + 1 + len as usize > buf.len() {
-                break;
-            }
-            name.push_str(std::str::from_utf8(&buf[offset + 1..offset + 1 + len as usize]).unwrap());
             offset += len as usize + 1;
         }
     }
 
-    name
+    if !label.is_empty() {
+        label.pop();
+    }
+    label
 }
-
 
