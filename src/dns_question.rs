@@ -39,13 +39,17 @@ impl DNSQuestion {
 }
 
 fn decode_name(buf: &[u8]) -> String {
-    let mut offset = 11;
+    let mut offset = 0;
     let mut name = String::new();
 
-    loop {
+    while offset < buf.len() {
         let len = buf[offset];
         if len == 0 {
-            break;
+            offset += 1;
+            if offset < buf.len() {
+                name.push('.');
+            }
+            continue;
         }
 
         if (len & 0xC0) == 0xC0 {
