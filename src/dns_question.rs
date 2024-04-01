@@ -20,27 +20,27 @@ impl DNSQuestion {
         buf
     }
 
-    pub fn decode_question(buf: &[u8], start: usize) -> (Self, usize) {
+    pub fn decode_question(buf: &[u8]) -> Self {
         println!("Decoding question");
-        let (qname, offset) = decode_name(buf, start);
+        let qname = decode_name(buf);
         println!("Decoded name: {}", qname);
+
+        let offset = qname.len() + 12;
 
         let qtype = u16::from_be_bytes([buf[offset], buf[offset + 1]]);
         let qclass = u16::from_be_bytes([buf[offset + 2], buf[offset + 3]]);
-    
-        (Self {
+
+        Self {
             qname,
             qtype,
             qclass,
-        }, offset + 4)
+        }
     }
 }
 
-fn decode_name(buf: &[u8], mut offset: usize) -> (String, usize) {
-    println!("Decoding name");
-    let mut qname = String::new();
-    let mut jumped = false;
-    let mut jump_offset = 0;
+fn decode_name(buf: &[u8]) -> String {
+    let mut offset = 11;
+    let mut name = String::new();
 
     loop {
         let len = buf[offset];
@@ -49,30 +49,21 @@ fn decode_name(buf: &[u8], mut offset: usize) -> (String, usize) {
         }
 
         if (len & 0xC0) == 0xC0 {
-            // This is a pointer to a previous name
-            if !jumped {
-                jump_offset = offset + 2;
-            }
             let byte1 = (len as u16) & 0x3F; // Last 6 bits of first byte
             let byte2 = buf[offset + 1] as u16; // Entire second byte
             offset = ((byte1 << 8) | byte2) as usize; // Calculate offset from start of message
-            let (name, _) = decode_name(buf, offset);
-            qname.push_str(&name);
-            jumped = true;
+            name.push_str(&decode_name(&buf[offset..]));
         } else {
-            if !qname.is_empty() {
-                qname.push('.');
+            if !name.is_empty() {
+                name.push('.');
             }
 
-            qname.push_str(std::str::from_utf8(&buf[offset + 1..offset + 1 + len as usize]).unwrap());
+            name.push_str(std::str::from_utf8(&buf[offset + 1..offset + 1 + len as usize]).unwrap());
             offset += len as usize + 1;
         }
     }
 
-    if !jumped {
-        jump_offset = offset + 1;
-    }
-
-    (qname, jump_offset)
+    name
 }
+
 
