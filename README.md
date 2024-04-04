@@ -1,38 +1,40 @@
-[![progress-banner](https://backend.codecrafters.io/progress/dns-server/01683d17-0090-47c6-8e50-883c143bea49)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# Simple Rust DNS Server
 
-This is a starting point for Rust solutions to the
-["Build Your Own DNS server" Challenge](https://app.codecrafters.io/courses/dns-server/overview).
+![Static Badge](https://img.shields.io/badge/Rust-Solutions-blue?logo=rust
+)
 
-In this challenge, you'll build a DNS server that's capable of parsing and
-creating DNS packets, responding to DNS queries, handling various record types
-and doing recursive resolve. Along the way we'll learn about the DNS protocol,
-DNS packet format, root servers, authoritative servers, forwarding servers,
-various record types (A, AAAA, CNAME, etc) and more.
+## Table of Contents
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+1. [About the Project](#about-the-project)
+2. [Getting Started](#getting-started)
+   - [Prerequisites](#prerequisites)
+3. [Author](#author)
 
-# Passing the first stage
+## About the Project
 
-The entry point for your `your_server.sh` implementation is in `src/main.rs`.
-Study and uncomment the relevant code, and push your changes to pass the first
-stage:
+This project is a simple DNS forwarder written in Rust. It's designed to handle DNS queries by forwarding them to a specified resolver and then returning the resolver's response to the original requester. The forwarder can handle multiple queries in a single request and supports the basic DNS record types. It's an educational project to demonstrate the basics of UDP networking and DNS protocol handling in Rust.
 
-```sh
-git add .
-git commit -m "pass 1st stage" # any msg
-git push origin master
+The forwarder listens on `127.0.0.1:2053` and supports forwarding DNS queries to a specified resolver. It decodes the incoming DNS message, extracts the questions, and then forwards each question to the resolver. Once the resolver responds, the forwarder decodes the response, extracts the answers, and then sends these answers back to the original requester. Additionally, it allows for the specification of the resolver address via command line arguments.
+
+## Getting Started
+
+To get a local copy up and running, follow these simple steps:
+
+### Prerequisites
+
+To run this web server, you will need:
+
+- Rust programming environment setup on your machine. You can follow the official guide to install Rust: [Rust Installation](https://www.rust-lang.org/tools/install).
+- Basic understanding of Rust and TCP/IP networking.
+
+Once Rust is installed, you can clone this repository or copy the source code into your own Rust project. Make sure to include all the provided code in your `main.rs` and any module files as required.
+
+To run the server, navigate to the project directory in your terminal and execute:
+```rust
+cargo run main.rs
 ```
 
-Time to move on to the next stage!
+Alternatively, you can execute the `your_server.sh` shell script.
+## Author
 
-# Stage 2 & beyond
-
-Note: This section is for stages 2 and beyond.
-
-1. Ensure you have `cargo (1.70)` installed locally
-1. Run `./your_server.sh` to run your program, which is implemented in
-   `src/main.rs`. This command compiles your Rust project, so it might be slow
-   the first time you run it. Subsequent runs will be fast.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+Timothy Hwang
